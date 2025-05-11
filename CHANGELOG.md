@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/leocodeio-spectral/sp-be-manger/compare/v1.0.0...v1.0.1) (2025-05-11)
+
+
+### Performance Improvements
+
+* **updated code:** updated code ([8850f01](https://github.com/leocodeio-spectral/sp-be-manger/commit/8850f01933a185c6df2647447e41f816f65a451f))
+
 # 1.0.0 (2025-05-11)
 
 

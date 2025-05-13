@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/leocodeio-spectral/sp-be-manger/compare/v1.0.1...v1.1.0) (2025-05-13)
+
+
+### Features
+
+* **s3 added with localstack:** s3 added with localstack ([976793b](https://github.com/leocodeio-spectral/sp-be-manger/commit/976793beb01f247cf584b97a4083406cd75d060e))
+
 ## [1.0.1](https://github.com/leocodeio-spectral/sp-be-manger/compare/v1.0.0...v1.0.1) (2025-05-11)
 
 

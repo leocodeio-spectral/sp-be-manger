@@ -13,6 +13,7 @@ import { HealthModule, PrometheusService } from '@leocodeio-njs/njs-health';
 import { AppConfigModule } from '@leocodeio-njs/njs-config';
 import { AppConfigService } from '@leocodeio-njs/njs-config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { S3Module } from './libs/s3/s3.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     TypeOrmModule.forFeature([LogEntry]),
     HealthModule,
+    S3Module,
   ],
   controllers: [AppController],
   providers: [

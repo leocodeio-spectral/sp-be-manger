@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/leocodeio-spectral/sp-be-manger/compare/v1.1.1...v1.1.2) (2025-05-14)
+
+
+### Performance Improvements
+
+* **implemented media tables:** implemented media tables ([aac6e3c](https://github.com/leocodeio-spectral/sp-be-manger/commit/aac6e3c871b9d65da204ba4163b7e2df7a59c70c))
+
 ## [1.1.1](https://github.com/leocodeio-spectral/sp-be-manger/compare/v1.1.0...v1.1.1) (2025-05-13)
 
 

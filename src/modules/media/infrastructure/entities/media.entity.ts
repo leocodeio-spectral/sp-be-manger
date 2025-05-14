@@ -16,11 +16,14 @@ export class Media {
   type: MediaType;
 
   @Column({ type: 'varchar', nullable: true })
-  url: string | null;
+  integrationUrl: string | null;
 
-  @Column({ name: 'created_at' })
+  @Column({ type: 'varchar', nullable: true })
+  integrationKey: string | null;
+
+  @Column({ name: 'created_at', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({ name: 'updated_at' })
+  @Column({ name: 'updated_at', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 }

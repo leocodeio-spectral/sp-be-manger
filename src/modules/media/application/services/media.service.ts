@@ -14,8 +14,8 @@ export class MediaService {
     return this.mediaPort.findById(id);
   }
 
-  create(media: Partial<IMedia>): Promise<IMedia> {
-    return this.mediaPort.save(media);
+  create(media: Partial<IMedia>, file: Express.Multer.File): Promise<IMedia> {
+    return this.mediaPort.save(media, file);
   }
 
   update(id: string, media: Partial<IMedia>): Promise<IMedia | null> {

@@ -1,12 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { IMediaPort } from '../../domain/ports/media.port';
 import { IMedia } from '../../domain/models/media.port';
 import { DataSource } from 'typeorm';
 import { Media } from '../entities/media.entity';
+import { S3Service } from '../../../../libs/s3/application/services/s3.service';
+import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class MediaRepositoryAdapter implements IMediaPort {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly s3Service: S3Service,
+    private readonly configService: ConfigService,
+  ) {}
 
   async findAll(): Promise<IMedia[]> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -44,12 +51,31 @@ export class MediaRepositoryAdapter implements IMediaPort {
     }
   }
 
-  async save(media: Partial<IMedia>): Promise<IMedia> {
+  async save(
+    media: Partial<IMedia>,
+    file: Express.Multer.File,
+  ): Promise<IMedia> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const manager = queryRunner.manager;
+      // save to s3
+      const fileName =
+        new Date().toISOString() +
+        file.originalname +
+        randomUUID() +
+        '.' +
+        file.mimetype.split('/')[1];
+      const s3result = await this.s3Service.uploadFile({
+        file,
+        bucketName: this.configService.getOrThrow('AWS_S3_BUCKET_NAME'),
+        folder: this.configService.getOrThrow('AWS_S3_FOLDER_NAME'),
+        fileName,
+      });
+      media.integrationUrl = s3result.url;
+      media.integrationKey = s3result.key;
+      // save to db
       const result = await manager.save(Media, media);
       await queryRunner.commitTransaction();
       return this.toDomain(result);
@@ -87,6 +113,18 @@ export class MediaRepositoryAdapter implements IMediaPort {
     await queryRunner.startTransaction();
     try {
       const manager = queryRunner.manager;
+      const media = await manager.findOne(Media, {
+        where: { id },
+      });
+      if (!media) {
+        throw new NotFoundException('Media not found');
+      }
+      if (media.integrationKey) {
+        await this.s3Service.deleteFile(
+          media.integrationKey,
+          this.configService.getOrThrow('AWS_S3_BUCKET_NAME'),
+        );
+      }
       await manager.delete(Media, id);
       await queryRunner.commitTransaction();
     } catch (error) {
@@ -103,7 +141,8 @@ export class MediaRepositoryAdapter implements IMediaPort {
       userId: media.userId,
       accountId: media.accountId,
       type: media.type,
-      url: media.url ? media.url : null,
+      integrationUrl: media.integrationUrl ? media.integrationUrl : null,
+      integrationKey: media.integrationKey ? media.integrationKey : null,
       createdAt: media.createdAt,
       updatedAt: media.updatedAt,
     };
@@ -115,9 +154,10 @@ export class MediaRepositoryAdapter implements IMediaPort {
       userId: media.userId,
       accountId: media.accountId,
       type: media.type,
-      url: media.url ? media.url : null,
-      createdAt: media.createdAt,
-      updatedAt: media.updatedAt,
+      integrationUrl: media.integrationUrl ? media.integrationUrl : null,
+      integrationKey: media.integrationKey ? media.integrationKey : null,
+      createdAt: media.createdAt || new Date(),
+      updatedAt: media.updatedAt || new Date(),
     };
   }
 }

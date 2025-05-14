@@ -1,4 +1,9 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   S3Client,
@@ -6,6 +11,7 @@ import {
   GetObjectCommand,
   CreateBucketCommand,
   HeadBucketCommand,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
@@ -114,6 +120,10 @@ export class S3Service {
     const fileKey = `${folder ? folder + '/' : ''}${fileName || randomUUID()}-${file.originalname}`;
 
     try {
+      if (!(await this.bucketExists(bucketName))) {
+        // await this.createBucket(bucketName);
+        throw new NotFoundException('Bucket does not exist');
+      }
       await this.s3Client.send(
         new PutObjectCommand({
           Bucket: bucketName,
@@ -163,6 +173,17 @@ export class S3Service {
         error.stack,
       );
       throw new Error(`Failed to create bucket: ${error.message}`);
+    }
+  }
+
+  async deleteFile(key: string, bucketName: string): Promise<void> {
+    try {
+      await this.s3Client.send(
+        new DeleteObjectCommand({ Bucket: bucketName, Key: key }),
+      );
+    } catch (error) {
+      this.logger.error(`Failed to delete file: ${error.message}`);
+      throw new Error(`Failed to delete file: ${error.message}`);
     }
   }
 }

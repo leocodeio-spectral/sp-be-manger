@@ -5,7 +5,8 @@ export class IMedia {
   userId: string;
   accountId: string;
   type: MediaType;
-  url?: string | null;
+  integrationUrl?: string | null;
+  integrationKey?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

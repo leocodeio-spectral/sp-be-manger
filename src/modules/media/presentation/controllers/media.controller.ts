@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -6,11 +7,15 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { MediaService } from '../../application/services/media.service';
 import { IMedia } from '../../domain/models/media.port';
 import { CreateMediaDto } from '../../application/dtos/create-media.dto';
 import { UpdateMediaDto } from '../../application/dtos/update-media.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 
 @Controller('media')
 export class MediaController {
@@ -27,8 +32,32 @@ export class MediaController {
   }
 
   @Post()
-  async create(@Body() createMediaDto: CreateMediaDto) {
-    return this.mediaService.create(createMediaDto);
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload a file',
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'File to upload',
+        },
+        userId: { type: 'uuid', example: 'd7559eb1-e7c0-41c2-bbc9-ac826b484c83' },
+        accountId: { type: 'uuid', example: 'd7559eb1-e7c0-41c2-bbc9-ac826b484c83' },
+        type: { type: 'string', example: 'image' },
+      },
+    },
+  })
+  async create(
+    @Body() createMediaDto: CreateMediaDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+    return this.mediaService.create(createMediaDto, file);
   }
 
   @Put(':id')

@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/leocodeio-spectral/sp-be-manger/compare/v1.1.2...v1.2.0) (2025-05-14)
+
+
+### Features
+
+* **working from user end:** working from user end ([5e34512](https://github.com/leocodeio-spectral/sp-be-manger/commit/5e34512d236fe3ee9c02d6330c025d3bb65e9420))
+
 ## [1.1.2](https://github.com/leocodeio-spectral/sp-be-manger/compare/v1.1.1...v1.1.2) (2025-05-14)
 
 
